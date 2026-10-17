@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Global Safety Net Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidUserProfile(data) {
+      return data.keys().hasAll(['userId', 'displayName', 'rating'])
+        && data.keys().hasOnly(['userId', 'displayName', 'email', 'emoji', 'rating', 'highScore', 'createdAt'])
+        && data.userId == request.auth.uid
+        && data.displayName is string && data.displayName.size() >= 1 && data.displayName.size() <= 40
+        && data.rating is number && data.rating >= 0 && data.rating <= 4000;
+    }
+
+    function isValidMatchRecord(data) {
+      return data.keys().hasAll(['matchId', 'userId', 'score', 'gameType'])
+        && data.keys().hasOnly(['matchId', 'userId', 'gameType', 'playerMode', 'score', 'ratingDelta', 'accuracyPercent', 'durationSeconds', 'status', 'createdAt'])
+        && data.userId == request.auth.uid
+        && data.matchId is string && isValidId(data.matchId)
+        && data.gameType is string && data.gameType in ['racing', 'ball_balance', 'maze_hunter']
+        && data.score is number && data.score >= 0;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isOwner(userId) && isValidId(userId) && isValidUserProfile(incoming());
+      allow update: if isOwner(userId) && isValidUserProfile(incoming()) 
+        && incoming().userId == existing().userId;
+      allow delete: if false;
+    }
+
+    // Matches Collection
+    match /matches/{matchId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidId(matchId) && isValidMatchRecord(incoming());
+      allow update: if false;
+      allow delete: if false;
+    }
+  }
+}

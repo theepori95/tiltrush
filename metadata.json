@@ -1,0 +1,6 @@
+{
+  "name": "TiltRush: Neon Escape",
+  "description": "Motion-controlled indie arcade game turning your smartphone into a real-time gyroscope steering controller with 1-4 player split screen, game history graphs, and lavender aesthetic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

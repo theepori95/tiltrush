@@ -1,0 +1,102 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User account and pilot profile information",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Unique Google Auth user ID"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "Player display name"
+        },
+        "email": {
+          "type": "string",
+          "description": "User email address"
+        },
+        "emoji": {
+          "type": "string",
+          "description": "Selected pilot avatar emoji"
+        },
+        "rating": {
+          "type": "number",
+          "description": "Chess.com style pilot ELO rating"
+        },
+        "highScore": {
+          "type": "number",
+          "description": "All time highest match score"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Creation ISO timestamp"
+        }
+      },
+      "required": ["userId", "displayName", "rating"]
+    },
+    "MatchRecord": {
+      "title": "MatchRecord",
+      "description": "Individual game match telemetry and results",
+      "type": "object",
+      "properties": {
+        "matchId": {
+          "type": "string",
+          "description": "Unique match identifier"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Creator user ID"
+        },
+        "gameType": {
+          "type": "string",
+          "description": "Game type: racing, ball_balance, or maze_hunter"
+        },
+        "playerMode": {
+          "type": "string",
+          "description": "Mode: 1P Solo, 2P Duel, 3P Trio, 4P Royale"
+        },
+        "score": {
+          "type": "number",
+          "description": "Final score earned in match"
+        },
+        "ratingDelta": {
+          "type": "number",
+          "description": "Rating change from match"
+        },
+        "accuracyPercent": {
+          "type": "number",
+          "description": "Dodge and collection accuracy percentage"
+        },
+        "durationSeconds": {
+          "type": "number",
+          "description": "Duration of match in seconds"
+        },
+        "status": {
+          "type": "string",
+          "description": "Outcome: Victory, Completed, Crash, Escaped"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when match was recorded"
+        }
+      },
+      "required": ["matchId", "userId", "score", "gameType"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/UserProfile"
+      },
+      "description": "User profile documents keyed by Auth UID"
+    },
+    "/matches/{matchId}": {
+      "schema": {
+        "$ref": "#/entities/MatchRecord"
+      },
+      "description": "Individual match history records"
+    }
+  }
+}
